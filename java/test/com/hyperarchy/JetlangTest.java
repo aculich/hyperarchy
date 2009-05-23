@@ -1,6 +1,5 @@
 package com.hyperarchy;
 
-import junit.framework.TestCase;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.core.Callback;
@@ -10,7 +9,7 @@ import org.jetlang.fibers.ThreadFiber;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class JetlangTest extends TestCase {
+public class JetlangTest extends BaseTestCase {
   public void testJetlang() throws Exception {
     // start thread backed receiver.
     // Lighweight fibers can also be created using a thread pool
