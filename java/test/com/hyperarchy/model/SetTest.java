@@ -7,4 +7,10 @@ public class SetTest extends BaseTestCase {
     Tuple tuple = candidatesSet.buildTuple();
     assertSame(candidatesSet, tuple.getSet());
   }
+
+  public void testInsert() throws Exception {
+    assertFalse(candidatesSet.getTuples().contains(candidiateTuple));
+    candidatesSet.insert(candidiateTuple);
+    assertTrue(candidatesSet.getTuples().contains(candidiateTuple));
+  }
 }
