@@ -23,3 +23,5 @@ gems:
     version: '0.11.5'
   - name: rspec
   - name: rr
+  - name: sequel
+    version: 3.4.0

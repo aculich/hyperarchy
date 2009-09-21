@@ -15,6 +15,7 @@ require "rubygems"
 
 if jruby?
   require "rack"
+  require "#{dir}/monarch/monarch-1-jar-with-dependencies"
 else
   require "thin"
 end

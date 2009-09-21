@@ -5,10 +5,11 @@ class Benchmarker
   end
 
   def call(env)
-    start = Time.now.to_i
+    p env
+#    start = Time.now.to_i
     result = app.call(env)
-    puts "#{Time.now.to_i - start} -- #{env['PATH_INFO']}"
-    result
+#    puts "#{Time.now.to_i - start} -- #{env['PATH_INFO']}"
+#    result
   end
 end
 
@@ -28,7 +29,7 @@ module Http
     def start(options)
       port = options.delete(:port) || 8080
       Thin::Server.start(port) do
-#        use Benchmarker
+        use Benchmarker
         use Rack::ContentLength
         use Rack::ShowExceptions
         use AssetService, AssetManager.instance
