@@ -8,7 +8,11 @@ Dir["#{File.dirname(__FILE__)}/spec_helpers/*.rb"].each do |spec_helper_path|
   require spec_helper_path
 end
 
-Origin.connection = Sequel.sqlite
+if jruby?
+  Origin.connection = Sequel.connect("jdbc:sqlite::memory:")
+else
+  Origin.connection = Sequel.sqlite
+end
 Model::Repository.create_schema
 
 Spec::Runner.configure do |config|

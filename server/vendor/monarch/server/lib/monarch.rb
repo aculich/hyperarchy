@@ -1,10 +1,23 @@
 dir = File.dirname(__FILE__)
+
+class Object
+  def jruby?
+    defined? JRUBY_VERSION
+  end
+end
+
+
 MONARCH_SERVER_ROOT = File.expand_path(File.join(dir, '..', '..'))
 MONARCH_CLIENT_SERVER_ROOT = File.expand_path(File.join(MONARCH_SERVER_ROOT, 'client'))
 MONARCH_SERVER_SERVER_ROOT = File.expand_path(File.join(MONARCH_SERVER_ROOT, 'server'))
 
 require "rubygems"
-require "thin"
+
+if jruby?
+  require "rack"
+else
+  require "thin"
+end
 require "sequel"
 require "sequel/extensions/inflector"
 require "guid"

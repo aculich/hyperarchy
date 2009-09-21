@@ -21,7 +21,7 @@ module Http
     def require_declarations
       declarations = []
       File.open(physical_path, 'r') do |f|
-        f.lines.each do |line|
+        f.readlines.each do |line|
           if match = RELATIVE_REQUIRE_REGEX.match(line)
             require_path = match[0]
             declarations.push(RelativeRequireDeclaration.new(containing_dir, match[1], asset_manager))
