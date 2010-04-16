@@ -37,6 +37,11 @@ _.constructor("Views.Elections", View.Template, {
       this.subscriptions = new Monarch.SubscriptionBundle();
     },
 
+    afterAttach: function() {
+      console.debug(this.data());
+      console.debug("elections");
+    },
+
     election: {
       afterChange: function(election) {
         this.bodyDiv.html(election.body());

@@ -30,6 +30,10 @@ _.constructor("Views.Organizations", View.Template, {
       this.organization(Organization.find(organizationId));
     },
 
+    afterAttach: function() {
+      console.debug("organizations");
+    },
+
     organization: {
       afterChange: function() {
         this.displayElections();

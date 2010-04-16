@@ -116,9 +116,8 @@ div#createCandidateForm button {
 }
 
 .elections ol.candidates li.ui-draggable-dragging {
-  list-style-type: disc;
+  list-style-type: none;
 }
-
 
 .candidateIcon {
   position: absolute;
