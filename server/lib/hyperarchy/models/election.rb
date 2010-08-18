@@ -12,26 +12,25 @@ class Election < Monarch::Model::Record
 
   def compute_global_ranking
     puts "compute_global_ranking"
-    already_processed = []
-    graph = RGL::DirectedAdjacencyGraph.new
+    graph = MajorityGraph.new
 
     majorities.order_by(Majority[:pro_count].desc, Majority[:con_count].asc).each do |majority|
-      winner_id = majority.winner_id
-      loser_id = majority.loser_id
-      next if already_processed.include?([loser_id, winner_id])
-      already_processed.push([winner_id, loser_id])
-      graph.add_edge(winner_id, loser_id)
-      graph.remove_edge(winner_id, loser_id) unless graph.acyclic?
+      p majority.pro_count, majority.con_count    
+      if majority.pro_count >= majority.con_count
+        graph.add_edge(majority.winner_id, majority.loser_id, majority.pro_count)
+      end
     end
 
-    graph.topsort_iterator.each_with_index do |candidate_id, index|
-      candidate = candidates.find(candidate_id)
-      puts "updating #{candidate.body.inspect} from #{candidate.position} to #{index}"
-      candidate.update(:position => index + 1)
+    graph.ranked_candidates do |candidates, index|
+      candidates.each do |candidate|
+        puts "updating #{candidate.body.inspect} from #{candidate.position} to #{index}"
+        candidate.update(:position => index + 1)
+      end
     end
 
     update(:updated_at => Time.now)
   end
+
 
   def positive_rankings
     rankings.where(Ranking[:position] > 0)

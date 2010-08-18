@@ -6,6 +6,7 @@ require "#{dir}/paths"
 require "rubygems"
 require "bundler"
 ENV['BUNDLE_GEMFILE'] ||= "#{dir}/../../Gemfile"
+require "set"
 
 Bundler::require(:default, RACK_ENV.to_sym)
 require "monarch"
