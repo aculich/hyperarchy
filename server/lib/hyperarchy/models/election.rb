@@ -20,17 +20,15 @@ class Election < Monarch::Model::Record
       end
     end
 
-    puts "updating candidates"
-    graph.ranked_candidates do |candidates, index|
+    graph.ranked_candidates.each_with_index do |candidates, index|
       candidates.each do |candidate|
-        puts "updating #{candidate.body.inspect} from #{candidate.position} to #{index}"
+        puts "updating #{candidate.body.inspect} from #{candidate.position.inspect} to #{index + 1}"
         candidate.update(:position => index + 1)
       end
     end
 
     update(:updated_at => Time.now)
   end
-
 
   def positive_rankings
     rankings.where(Ranking[:position] > 0)
