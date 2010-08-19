@@ -5,15 +5,20 @@ class MajorityGraph
   end
 
   def add_edge(winner_id, loser_id, count)
+    puts "add_edge #{winner_id}, #{loser_id}, #{count}"
+    
     graph.add_edge(winner_id, loser_id)
-    return if graph.acyclic?
-    cycles = graph.cycles_with_vertex(winner_id)
 
-    p "add_edge"
+    cycles = graph.cycles_with_vertex(winner_id)
+    return if cycles.empty?
+
+    puts "edge is within cycles: #{cycles.inspect}"
+
     if cycles_contain_edge_with_greater_count?(cycles, count)
-      p "removing edge"
+      puts "removing edge"
       graph.remove_edge(winner_id, loser_id)
     else
+      puts "found a tie #{cycles.flatten.uniq.inspect}"
       add_to_tied_sets(SortedSet.new(cycles.flatten.uniq))
     end
   end
@@ -28,7 +33,10 @@ class MajorityGraph
     end
 
     results = []
+    puts "topsort"
     graph.topsort_iterator.each do |candidate_id|
+
+      p candidate_id
       if tied_set = tied_sets_by_representative_id[candidate_id]
         results.push(tied_set.to_a)
       else

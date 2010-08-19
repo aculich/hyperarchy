@@ -15,12 +15,12 @@ class Election < Monarch::Model::Record
     graph = MajorityGraph.new
 
     majorities.order_by(Majority[:pro_count].desc, Majority[:con_count].asc).each do |majority|
-      p majority.pro_count, majority.con_count    
       if majority.pro_count >= majority.con_count
         graph.add_edge(majority.winner_id, majority.loser_id, majority.pro_count)
       end
     end
 
+    puts "updating candidates"
     graph.ranked_candidates do |candidates, index|
       candidates.each do |candidate|
         puts "updating #{candidate.body.inspect} from #{candidate.position} to #{index}"

@@ -15,6 +15,16 @@ module Models
       @unranked = election.candidates.create!(:body => "Unranked")
     end
 
+    describe "simple test" do
+      it "tries to work" do
+        user = User.make
+        election.rankings.create(:user => user, :candidate => memphis, :position => 4)
+        election.rankings.create(:user => user, :candidate => nashville, :position => 3)
+        election.rankings.create(:user => user, :candidate => chattanooga, :position => 2)
+        election.rankings.create(:user => user, :candidate => knoxville, :position => 1)
+      end
+    end
+
     describe "#compute_global_ranking" do
       it "uses the ranked-pairs algoritm to produce a global ranking, assigning a position of null to any unranked candidates" do
         Timecop.freeze(Time.now + 60)
