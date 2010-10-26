@@ -3,50 +3,33 @@ require File.expand_path("#{File.dirname(__FILE__)}/thor_helper")
 class Server < Thor
   map "fg" => :foreground
   
-  desc "start [environment=development] [port]", "starts the app server for the specified environment in the background"
-  def start(env="development", port=nil)
-    require "daemons"
-    options = daemon_options(:start)
-    Dir.mkdir(options[:dir]) unless File.exist?(options[:dir]) || File.symlink?(options[:dir])
-    Daemons.run_proc("hyperarchy_#{env}", options) do
-      require_and_run(env, port)
-    end
+  desc "start [environment=development]", "starts the app server for the specified environment in the background"
+  def start(env="development")
+    exec_thin(:start, env, :daemonize)
   end
 
   desc "stop [environment=development]", "stops the app server for the specified environment"
   def stop(env="development")
-    require "daemons"
-    Daemons.run_proc("hyperarchy_#{env}", daemon_options(:stop)) {}
+    exec_thin(:stop, env, :daemonize)
   end
 
-  desc "foreground [environment=development] [port]", "runs the app server in the foreground"
-  def foreground(env="development", port=nil)
-    require_and_run(env, port)
+  desc "foreground [environment=development]", "runs the app server in the foreground"
+  def foreground(env="development")
+    exec_thin(:start, env)
   end
 
   private
+  def exec_thin(command, env, daemonize=nil)
+    Dir.chdir(ROOT)
 
-  def daemon_options(start_or_stop)
-    {
-      :app_name   => "hyperarchy_server",
-      :ARGV       => [start_or_stop.to_s],
-      :dir_mode   => :normal,
-      :dir        => File.expand_path("#{dir}/../../log"),
-      :multiple   => false,
-      :mode       => :exec,
-      :backtrace  => true,
-      :log_output => true
-    }
-  end
+    command = [
+      "bundle exec thin #{command}",
+      "--environment #{env}",
+      "--config config/thin.#{env}.yml",
+      "--rackup config/hyperarchy.ru",
+      (daemonize ? "--daemonize --log #{LOG_DIR}/thin_#{env}.log --pid #{LOG_DIR}/hyperarchy_#{env}.pid"  : nil)
+    ].compact.join(" ")
 
-  def require_and_run(env, port)
-    require_hyperarchy(env)
-    options = { :host => 'localhost' }
-    options[:port] = port if port
-    Hyperarchy::App.run!(options)
-  end
-
-  def dir
-    File.dirname(__FILE__)
+    exec(command)
   end
 end
