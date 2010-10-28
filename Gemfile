@@ -1,3 +1,4 @@
+dir = File.dirname(__FILE__)
 source :gemcutter
 
 # monarch
@@ -12,6 +13,7 @@ gem "cramp", "0.10"
 
 ## hyperarchy
 gem "thin", "1.2.7"
+gem "eventmachine", "0.12.11", :path => "#{dir}/server/vendor/eventmachine-0.12.11"
 gem "warden", "0.10.7"
 gem "erector", "0.6.7"
 gem "rack-flash", "0.1.1"

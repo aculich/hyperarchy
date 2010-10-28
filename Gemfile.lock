@@ -1,3 +1,8 @@
+PATH
+  remote: server/vendor/eventmachine-0.12.11
+  specs:
+    eventmachine (0.12.11)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -23,7 +28,6 @@ GEM
     daemons (1.0.10)
     erector (0.6.7)
       treetop (>= 1.2.3)
-    eventmachine (0.12.10)
     faker (0.3.1)
     git (1.2.5)
     guid (0.1.1)
@@ -93,6 +97,7 @@ DEPENDENCIES
   cramp (= 0.10)
   daemons (= 1.0.10)
   erector (= 0.6.7)
+  eventmachine (= 0.12.11)!
   faker (= 0.3.1)
   git (= 1.2.5)
   guid (= 0.1.1)
