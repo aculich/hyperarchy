@@ -126,7 +126,7 @@ module Hyperarchy
       end
 
       memberships = params[:email_addresses].from_json.map do |email_address|
-        organization.memberships.create!(:email_address => email_address)
+        organization.memberships.create!(:email_address => email_address, :role => params[:role])
       end
       successful_json_response(nil, memberships)
     end
