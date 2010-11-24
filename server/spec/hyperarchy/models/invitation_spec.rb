@@ -2,17 +2,12 @@ require File.expand_path("#{File.dirname(__FILE__)}/../../hyperarchy_spec_helper
 
 module Models
   describe Invitation do
-    attr_reader :emails, :inviter, :invitation
+    attr_reader :inviter, :invitation
 
     before do
       set_current_user(User.make)
-      @emails = []
       @inviter = User.make
-      @invitation = Invitation.create!(:inviter => inviter, :sent_to_address => "bob@example.com", :send_email => send_email)
-    end
-
-    def send_email
-      false
+      @invitation = Invitation.create!(:inviter => inviter, :sent_to_address => "bob@example.com")
     end
 
     describe "before create" do
@@ -23,29 +18,6 @@ module Models
       it "assigns a guid to the invitation and assigns the current user as the inviter if none is already specified" do
         invitation.guid.should_not be_nil
         invitation.inviter.should == current_user
-      end
-    end
-
-    describe "after create" do
-      context "when :send_email is true" do
-        def send_email
-          true
-        end
-
-        it "sends an email to the :sent_to_address" do
-          Mailer.emails.length.should == 1
-
-          email = Mailer.emails.first
-          email[:to].should == "bob@example.com"
-          email[:subject].should match(Regexp.new(inviter.full_name))
-          email[:body].should include("hyperarchy.com/signup?invitation_code=#{invitation.guid}")
-        end
-      end
-
-      context "when :send_email is false" do
-        it "does not send any email" do
-          Mailer.emails.should be_empty
-        end
       end
     end
 

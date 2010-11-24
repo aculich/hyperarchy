@@ -14,20 +14,9 @@ class Invitation < Monarch::Model::Record
     memberships.join_through(Organization)
   end
 
-  attr_accessor :send_email
-
   def before_create
     self.guid = Guid.new.to_s
     self.inviter ||= current_user
-  end
-  
-  def after_create
-    return unless send_email
-    Mailer.send(
-      :to => sent_to_address,
-      :subject => "#{inviter.full_name} has invited you to join Hyperarchy",
-      :body => invite_email_body
-    )
   end
 
   def email_address
@@ -55,12 +44,5 @@ class Invitation < Monarch::Model::Record
 
   def signup_url
     "#{Mailer.base_url}/signup?invitation_code=#{guid}"
-  end
-
-  protected
-  def invite_email_body
-    %[#{HYPERARCHY_BLURB}
-
-Visit #{signup_url} to sign as an alpha tester. You can then add your organization and invite your colleagues to vote with you.]
   end
 end
