@@ -14,9 +14,9 @@ class Membership < Monarch::Model::Record
   belongs_to :user
   belongs_to :invitation
 
-  attr_writer :email_address, :first_name, :last_name
   attr_accessor :suppress_invite_email
-  delegate :email_address, :first_name, :last_name, :to => :user_details_delegate
+  attr_writer :email_address
+  delegate :first_name, :last_name, :to => :user_details_delegate
 
 
   def current_user_is_admin_or_organization_owner?
@@ -47,14 +47,6 @@ class Membership < Monarch::Model::Record
 
   def email_address
     @email_address || user_details_delegate.email_address
-  end
-
-  def first_name
-    @first_name || user_details_delegate.first_name
-  end
-
-  def last_name
-    @last_name || user_details_delegate.last_name
   end
 
   def user_details_delegate
