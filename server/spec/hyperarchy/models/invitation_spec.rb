@@ -5,6 +5,7 @@ module Models
     attr_reader :emails, :inviter, :invitation
 
     before do
+      set_current_user(User.make)
       @emails = []
       @inviter = User.make
       @invitation = Invitation.create!(:inviter => inviter, :sent_to_address => "bob@example.com", :send_email => send_email)
@@ -15,8 +16,13 @@ module Models
     end
 
     describe "before create" do
-      it "assigns a guid to the invitation" do
+      def inviter
+        nil
+      end
+
+      it "assigns a guid to the invitation and assigns the current user as the inviter if none is already specified" do
         invitation.guid.should_not be_nil
+        invitation.inviter.should == current_user
       end
     end
 

@@ -48,13 +48,11 @@ module Models
 
         email_address = "new_member@example.com"
 
-        membership_1 = organization.memberships.create!(:first_name => first_name, :last_name => last_name, :email_address => email_address)
+        membership_1 = organization.memberships.create!(:email_address => email_address)
         membership_1.should be_pending
 
         invitation = membership_1.invitation
         invitation.inviter.should == current_user
-        invitation.first_name.should == first_name
-        invitation.last_name.should == last_name
         invitation.sent_to_address.should == email_address
         membership_1.user.should be_nil
 
@@ -65,7 +63,7 @@ module Models
         invite_email_1[:subject].should include(organization.name)
         invite_email_1[:body].should match(/signup\?invitation_code=#{invitation.guid}/)
 
-        # Membership to a different organization associtates with the same invitation
+        # Membership to a different organization associates with the same invitation
         organization_2 = Organization.make
         membership_2 = organization_2.memberships.create!(:email_address => email_address)
 

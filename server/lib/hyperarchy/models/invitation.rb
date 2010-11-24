@@ -18,6 +18,7 @@ class Invitation < Monarch::Model::Record
 
   def before_create
     self.guid = Guid.new.to_s
+    self.inviter ||= current_user
   end
   
   def after_create

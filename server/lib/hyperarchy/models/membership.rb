@@ -71,12 +71,7 @@ class Membership < Monarch::Model::Record
     if user = User.find(:email_address => email_address)
       self.user = user
     else
-      self.invitation =
-        Invitation.find(:sent_to_address => email_address) ||
-          Invitation.create!(:sent_to_address => email_address,
-                             :first_name => first_name,
-                             :last_name => last_name,
-                             :inviter => current_user)
+      self.invitation = Invitation.find_or_create(:sent_to_address => email_address)
     end
   end
 

@@ -120,15 +120,15 @@ module Hyperarchy
     end
 
     post "/invite" do
-      rejected = []
-      params[:email_addresses].from_json.each do |email_address|
-        if Invitation.find(:sent_to_address => email_address)
-          rejected.push(email_address)
-        else
-          Invitation.create!(:inviter => current_user, :sent_to_address => email_address, :send_email => true)
-        end
+      organization = Organization.find(params[:organization_id])
+      unless organization.has_owner?(current_user)
+        raise Monarch::Unauthorized, "Non-owners cannot invite members to organizations"
       end
-      successful_json_response(:rejected => rejected)
+
+      memberships = params[:email_addresses].from_json.map do |email_address|
+        organization.memberships.create!(:email_address => email_address)
+      end
+      successful_json_response(nil, memberships)
     end
 
     post "/feedback" do
