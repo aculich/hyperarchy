@@ -21,6 +21,12 @@ _.constructor("Monarch.Http.CometClient", {
       xhr.onreadystatechange = function() {
         if (xhr.readyState == 3) {
           var data = _.trim(xhr.responseText.slice(numReceivedCharacters));
+          if (window.console) {
+            console.debug("-------------------");
+            console.debug(data)
+            console.debug("-------------------");
+          }
+
           numReceivedCharacters = xhr.responseText.length;
           if (data.length > 0) {
             _.each(data.split("\n"), function(messageString) {
