@@ -6,7 +6,7 @@ gem "sinatra", "1.0"
 gem "pg", "0.9.0"
 gem "sequel", "3.16.0"
 gem "activesupport", "3.0.1"
-gem "json", "1.2.0"
+gem "json", "1.4.6"
 gem "guid", "0.1.1"
 gem "cramp", "0.11"
 
@@ -20,6 +20,7 @@ gem "bcrypt-ruby", "2.1.1", :require => "bcrypt"
 gem "pony", "1.0"
 gem "rgl", "0.4.0", :require => ['rgl/base', 'rgl/adjacency', 'rgl/topsort']
 gem "newrelic_rpm", "2.13.2"
+
 
 group :development do
   gem "sinatra-reloader", "0.5.0", :require => "sinatra/reloader"
@@ -51,4 +52,9 @@ group :thor do
   gem "sequel", "3.16.0"
   gem "pg", "0.9.0"
   gem "mysql", "2.8.1"
+
+  # resque and dependencies
+  gem "resque", "1.10.0"
+  gem "SystemTimer", "1.2.1"
+#  gem "yajl-ruby", "0.7.8"
 end
