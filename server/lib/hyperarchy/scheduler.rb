@@ -5,9 +5,8 @@ module Hyperarchy
     def start
       Thread.new do
         Thread.abort_on_exception = true
-
         Clockwork.handler { |task| Resque.enqueue(task) }
-        Clockwork.every(2.seconds, Jobs::ComputeElectionScores)
+        Clockwork.every(1.minute, Jobs::ComputeElectionScores)
         Clockwork.run
       end
     end

@@ -91,7 +91,7 @@ _.constructor("Views.OrganizationOverview", View.Template, {
       Server.fetch(relationsToFetch)
         .onSuccess(function() {
           this.stopLoading();
-          var elections = this.organization().elections();
+          var elections = this.organization().elections().orderBy('score desc');
           this.renderElections(elections);
           this.subscribeToElections(elections);
         }, this);
