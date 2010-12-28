@@ -2,7 +2,11 @@ class Election < Monarch::Model::Record
   BONUS_VOTES = 1
   EXTRA_HOURS = 2
   GRAVITY = 1.8
-  INITIAL_SCORE = 0 + BONUS_VOTES / ((0 + EXTRA_HOURS) ** GRAVITY)
+  def self.compute_score(vote_count, age_in_hours)
+    (vote_count + BONUS_VOTES) / ((age_in_hours + EXTRA_HOURS) ** GRAVITY)
+  end
+  INITIAL_SCORE = compute_score(0, 0)
+
 
   column :organization_id, :key
   column :creator_id, :key
@@ -48,6 +52,18 @@ class Election < Monarch::Model::Record
   def before_create
     self.creator ||= current_user
     self.score =  INITIAL_SCORE
+  end
+
+  def before_update(changeset)
+    self.score = compute_score if changeset[:vote_count]
+  end
+
+  def compute_score
+    self.class.compute_score(vote_count, age_in_hours)
+  end
+
+  def age_in_hours
+    (Time.now - created_at) / 3600
   end
 
   def after_create

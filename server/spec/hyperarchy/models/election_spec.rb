@@ -57,6 +57,15 @@ module Models
       end
     end
 
+    describe "before update" do
+      it "updates the score based on the current vote count" do
+        score_before = election.score
+        election.vote_count += 1
+        election.save
+        election.score.should be > score_before
+      end
+    end
+
     describe "before destroy" do
       it "destroys any candidates, votes and visits that belong to the election" do
         election = Election.make
