@@ -29,7 +29,7 @@ GEM
       eventmachine (~> 0.12.10)
       mysqlplus (~> 0.1.1)
       rack (~> 1.1.0)
-    daemons (1.0.10)
+    daemons (1.1.0)
     erector (0.6.7)
       treetop (>= 1.2.3)
     faker (0.3.1)
@@ -122,7 +122,7 @@ DEPENDENCIES
   bcrypt-ruby (= 2.1.1)
   clockwork (= 0.2.1)
   cramp (= 0.11)
-  daemons (= 1.0.10)
+  daemons (= 1.1.0)
   erector (= 0.6.7)
   eventmachine (= 0.12.11)!
   faker (= 0.3.1)

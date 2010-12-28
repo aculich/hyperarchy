@@ -10,44 +10,16 @@ class Worker < Thor
   end
 
   desc "start [environment] [--verbose --vverbose --interval=5]", "Start a Resque worker reading queues from the specified environment."
-  method_options :verbose => false, :vverbose => false, :interval => 5
+  method_options :verbose => false, :vverbose => false, :interval => 5, :pidfile => nil
   def start(env="development")
-    fork { start_resque(env, options[:interval], options[:verbose], options[:vverbose]) }
+    require_hyperarchy(env)
+    worker = Hyperarchy::Worker.new(env, options)
+    worker.start
   end
 
   desc "stop [environment]", "Stops the Resque worker corresponding to the given environment."
   def stop(env="development")
-    require "resque"
-    pids = Resque.workers.map do |worker|
-      host, pid, queue = worker.id.split(':')
-      pid if queue == env
-    end.compact
-
-    if pids.empty?
-      puts "No workers to stop for #{env} environment"
-    else
-      command = "kill -QUIT #{pids.join(" ")}"
-      puts command
-      system(command)
-    end
-  end
-
-  protected
-
-  def start_resque(env, interval, verbose, vverbose)
     require_hyperarchy(env)
-    STDERR.sync = STDOUT.sync = true
-
-    worker = nil
-    begin
-      worker = Resque::Worker.new(queue = env)
-      worker.verbose = options[:verbose]
-      worker.very_verbose = options[:vverbose]
-    rescue Resque::NoQueueError
-      abort "Error finding queue for #{env} resque worker"
-    end
-
-    worker.log "Starting worker #{worker}"
-    worker.work(options[:interval])
+    Hyperarchy::Worker.stop(env)
   end
 end

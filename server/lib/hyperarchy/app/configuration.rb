@@ -12,7 +12,7 @@ module Hyperarchy
 
   class App < Sinatra::Base
     configure(:development) do
-      require 'new_relic/rack_app'
+        require 'new_relic/rack_app'
       use NewRelic::Rack::DeveloperMode
     end
 

@@ -52,10 +52,11 @@ group :thor do
   gem "bcrypt-ruby", "2.1.1", :require => "bcrypt"
   gem "net-ssh", "2.0.23"
   gem "git", "1.2.5"
-  gem "daemons", "1.0.10"
   gem "sequel", "3.16.0"
   gem "pg", "0.9.0"
   gem "mysql", "2.8.1"
+  gem "daemons", "1.1.0"
+
   # resque and dependencies
   gem "resque", "1.10.0"
   gem "SystemTimer", "1.2.1"
