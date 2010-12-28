@@ -1,4 +1,9 @@
 class Election < Monarch::Model::Record
+  BONUS_VOTES = 1
+  EXTRA_HOURS = 2
+  GRAVITY = 1.8
+  INITIAL_SCORE = 0 + BONUS_VOTES / ((0 + EXTRA_HOURS) ** GRAVITY)
+
   column :organization_id, :key
   column :creator_id, :key
   column :body, :string
@@ -42,6 +47,7 @@ class Election < Monarch::Model::Record
 
   def before_create
     self.creator ||= current_user
+    self.score =  INITIAL_SCORE
   end
 
   def after_create

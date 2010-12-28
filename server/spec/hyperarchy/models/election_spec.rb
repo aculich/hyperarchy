@@ -21,6 +21,10 @@ module Models
         election = Election.make
         election.creator.should == current_user
       end
+
+      it "assigns the initial score" do
+        election.score.should_not be_nil
+      end
     end
 
     describe "after create" do
