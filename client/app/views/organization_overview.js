@@ -42,6 +42,13 @@ _.constructor("Views.OrganizationOverview", View.Template, {
         }
       });
 
+      div({'class': "grid12"}, function() {
+        a({id: "moreQuestions", href: "#"}, "More Questions...")
+          .ref('nextPageLink')
+          .click('goToNextPage');
+      });
+
+
       div({'class': "clear"});
       div({'class': "bigLoading", 'style': "display: none;"}).ref('loading');
     });
@@ -54,6 +61,7 @@ _.constructor("Views.OrganizationOverview", View.Template, {
 
     initialize: function() {
       this.subscriptions = new Monarch.SubscriptionBundle();
+      this.pageFetchFuturesByOrgId = {};
     },
 
     navigate: function(state) {
@@ -72,6 +80,7 @@ _.constructor("Views.OrganizationOverview", View.Template, {
 
     organizationId: {
       afterChange: function(organizationId) {
+        if (!this.pageFetchFuturesByOrgId[organizationId]) this.pageFetchFuturesByOrgId[organizationId] = {};
         var membership = this.organization().membershipForCurrentUser();
         if (membership) membership.update({lastVisited: new Date()});
         if (this.pageNumber()) this.assignElectionsRelation();
@@ -83,7 +92,7 @@ _.constructor("Views.OrganizationOverview", View.Template, {
     },
 
     pageNumber: {
-      afterChange: function(pageNumber) {
+      afterChange: function() {
         if (this.organizationId()) this.assignElectionsRelation();
       }
     },
@@ -113,19 +122,35 @@ _.constructor("Views.OrganizationOverview", View.Template, {
 
       this.startLoading();
 
-      // still fetching all elections for now... this needs to be worked out
-      var relationsToFetch = [
-        this.organization().elections(),
-        this.organization().elections().joinTo(Candidate),
-        Application.currentUser().electionVisits()
-      ];
-
-      Server.fetch(relationsToFetch)
-        .onSuccess(function() {
-          this.stopLoading();
-        this.electionsList.relation(elections);
+      this.fetchCurrentPage().onSuccess(function() {
+        this.stopLoading();
+        this.electionsList.relation(elections).onComplete(function() {
+          $(window).scrollTop(1); $(window).scrollTop(0); // prevent mouse wheel from sticking in chrome on page transitions
+        }, this);
         this.subscribeToVisits(elections);
       }, this);
+    },
+
+    pageFetchFutures: function() {
+      return this.pageFetchFuturesByOrgId[this.organizationId()];
+    },
+
+    fetchCurrentPage: function() {
+      var currPage = this.pageNumber();
+      var prevPage = currPage - 1;
+      var nextPage = currPage + 1;
+
+      var future = Server.get("/fetch_organization_page", {
+        items_per_page: this.itemsPerPage,
+        page: currPage,
+        organization_id: this.organizationId()
+      });
+
+      _.each([prevPage, currPage, nextPage], function(page) {
+        if (!this.pageFetchFutures()[page]) this.pageFetchFutures()[page] = future;
+      }, this)
+
+      return this.pageFetchFutures()[currPage];
     },
 
     subscribeToVisits: function(elections) {
@@ -157,6 +182,12 @@ _.constructor("Views.OrganizationOverview", View.Template, {
           this.createElectionInput.val("");
           $.bbq.pushState({view: "election", electionId: election.id()});
         }, this);
+    },
+
+    goToNextPage: function(elt, event) {
+      var nextPage = this.pageNumber() + 1;
+      $.bbq.pushState({page: nextPage});
+      event.preventDefault();
     },
 
     startLoading: function() {

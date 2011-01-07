@@ -180,6 +180,22 @@ module Hyperarchy
       end
     end
 
+    get "/fetch_organization_page" do
+      organization = Organization.find(params[:organization_id])
+      raise Monarch::Unauthorized unless organization.current_user_is_member? || current_user.admin?
+      items_per_page = params[:items_per_page].to_i
+      page = params[:page].to_i
+      prev_page = page - 1
+      num_pages_to_fetch = page > 1 ? 3 : 2
+      offset = prev_page > 1 ? (prev_page - 1) * items_per_page : nil
+      limit = num_pages_to_fetch * items_per_page
+
+      elections = organization.elections.order_by(Election[:score].desc).limit(limit)
+      elections = elections.offset(offset) if offset
+
+      successful_json_response(nil, [elections, elections.join_through(Candidate), elections.join_through(current_user.election_visits)])
+    end
+
     post "/visited" do
       authentication_required
       visit = ElectionVisit.find_or_create(:user_id => current_user.id, :election_id => params[:election_id])

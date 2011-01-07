@@ -284,6 +284,10 @@ module Monarch
       end
 
       specify "limits and offsets inside of joins generate as subqueries" do
+
+
+        puts  Blog.join_to(BlogPost.limit(10).offset(10)).to_sql
+
         Blog.join_to(BlogPost.limit(10).offset(10)).project(Blog).to_sql.should be_like(%{
           select blogs.*
           from blogs, (

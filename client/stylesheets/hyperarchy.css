@@ -1377,6 +1377,10 @@ body.legal {
       padding-right: 6px; }
     #app #organizationOverview .election .candidates li .candidateBody {
       padding-top: 1px; }
+#app #organizationOverview #moreQuestions {
+  font-size: 19px;
+  float: right;
+  margin-bottom: 20px; }
 #app #organizationOverview .bigLoading {
   position: fixed;
   top: 50%;

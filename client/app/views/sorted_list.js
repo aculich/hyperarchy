@@ -15,6 +15,8 @@ _.constructor("Views.SortedList", View.Template, {
       afterChange: function(relation) {
         if (this.subscriptions) this.subscriptions.destroy();
 
+        var renderFuture = new Monarch.Future();
+
         this.empty();
         if (this.useQueue) {
           relation.each(function(record, index) {
@@ -22,11 +24,13 @@ _.constructor("Views.SortedList", View.Template, {
               this.append(this.elementForRecord(record, index));
             }, this);
           }, this);
+          this.renderQueue.add(renderFuture.hitch('complete'));
           this.renderQueue.start();
         } else {
           relation.each(function(record, index) {
             this.append(this.elementForRecord(record, index));
           }, this);
+          renderFuture.complete();
         }
 
         this.subscriptions.add(relation.onInsert(function(record, index) {
@@ -44,6 +48,8 @@ _.constructor("Views.SortedList", View.Template, {
         this.subscriptions.add(relation.onRemove(function(record, index) {
           this.elementForRecord(record, index).remove();
         }, this));
+
+        return renderFuture;
       }
     },
 
