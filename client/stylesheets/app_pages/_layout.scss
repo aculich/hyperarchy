@@ -88,6 +88,10 @@
       padding: 0;
       margin: 0;
       overflow: hidden;
+
+      > div {
+        height: 40px;
+      }
       
       h2 {
         padding: 5 30px;
@@ -99,10 +103,20 @@
         cursor: pointer;
       }
 
+      #logoWrapper {
+        display: block;
+        float: left;
+        margin-top: 10px;
+        margin-left: 30px;
+        margin-right: 30px;
+        cursor: pointer;
+      }
+
       a {
         display: inline-block;
         font-size: 18px;
         margin: 0;
+        margin-top: 5px;
         padding: 5px 12px;
         color: white;
         position: relative;
@@ -117,7 +131,7 @@
 
         &.rightSide {
           float: right;
-          padding: 10px 40px;
+          padding: 5px 40px;
           padding-left: 20px;
           background-repeat: no-repeat;
           background-position: 3px;

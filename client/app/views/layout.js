@@ -41,7 +41,7 @@ _.constructor("Views.Layout", View.Template, {
 
 
       div({id: "header"}, function() {
-        div({id: "logoWrapper", 'class': "headerItemX"}, function() {
+        div({id: "logoWrapper", 'class': "headerItemX", style: "display: none"}, function() {
           div({id: "logo"}).click('goToLastOrganization');
         });
 
@@ -63,20 +63,29 @@ _.constructor("Views.Layout", View.Template, {
 
         div({id: "contentHeader"}, function() {
           div(function() {
-            h2({id: "organizationName"})
+            h2({id: "organizationName", style: "display: none"})
               .ref('organizationName')
               .click('goToOrganization');
-            a({id: "questionsLink"}, "Questions")
-              .ref('questionsLink')
-              .click('goToQuestions');
-            a({id: "membersLink", style: "display: none"}, "Members")
-              .ref('membersLink')
-              .click("goToMembers");
-            a({id: "organizationSettings"}, "Settings")
-              .ref("editOrganizationLink")
-              .click("goToEditOrganization");
 
-            a({id: "raise", 'class': "rightSide"}, "Raise Question");
+            div({id: "logoWrapper" }, function() {
+              div({id: "logoWhite"}).click('goToLastOrganization');
+            });
+
+
+            div({style: "display: none"}, function() {
+              a({id: "questionsLink"}, "Questions")
+                .ref('questionsLink')
+                .click('goToQuestions');
+              a({id: "membersLink"}, "Members")
+                .ref('membersLink')
+                .click("goToMembers");
+              a({id: "organizationSettings"}, "Settings")
+                .ref("editOrganizationLink")
+                .click("goToEditOrganization");
+              
+            });
+
+            a({id: "raise", 'class': "rightSide"}, "Raise A Question");
           }).ref("organizationHeader");
 
           div(function() {

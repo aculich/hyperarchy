@@ -50,13 +50,6 @@ _.constructor("Views.OrganizationOverview", View.Template, {
           span("1-10 of 89");
           a(">>");
         });
-
-        div({id: "subpages"}, function() {
-          a("Newest");
-          a("Most Popular");
-          a("Favorites");
-        });
-
       }).ref("subheaderContent");
 
       div({'class': "bigLoading", 'style': "display: none;"}).ref('loading');
