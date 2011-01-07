@@ -1380,7 +1380,7 @@ body.legal {
 #app #organizationOverview #moreQuestions {
   font-size: 19px;
   margin-bottom: 20px;
-  display: none; }
+  display: block; }
 #app #organizationOverview .bigLoading {
   position: fixed;
   top: 50%;

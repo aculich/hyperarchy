@@ -42,14 +42,16 @@ _.constructor("Views.OrganizationOverview", View.Template, {
         }
       });
 
+      div({'class': "clear"});
+      
       div({'class': "grid12"}, function() {
         a({id: "moreQuestions", href: "#"}, "More Questions...")
           .ref('nextPageLink')
           .click('goToNextPage');
       });
 
-
       div({'class': "clear"});
+
       div({'class': "bigLoading", 'style': "display: none;"}).ref('loading');
     });
   }},
@@ -60,7 +62,6 @@ _.constructor("Views.OrganizationOverview", View.Template, {
     itemsPerPage: 16,
 
     initialize: function() {
-      this.subscriptions = new Monarch.SubscriptionBundle();
       this.pageFetchFuturesByOrgId = {};
       this.highestFetchedPageByOrgId = {};
     },
@@ -89,6 +90,14 @@ _.constructor("Views.OrganizationOverview", View.Template, {
         var membership = this.organization().membershipForCurrentUser();
         if (membership) membership.update({lastVisited: new Date()});
         if (this.pageNumber()) this.assignElectionsRelation();
+
+        if (this.organizationSubscription) this.organizationSubscription.destroy();
+        this.organizationSubscription = this.organization().onUpdate(function(changeset) {
+          if (changeset.electionCount) {
+            if (this.noElectionsOnThisPage()) $.bbq.pushState({page: this.lastValidPage()});
+            if (this.shouldShowNextPageLink()) this.nextPageLink.show();
+          }
+        }, this);
       }
     },
 
@@ -98,6 +107,10 @@ _.constructor("Views.OrganizationOverview", View.Template, {
 
     pageNumber: {
       afterChange: function() {
+        if (this.noElectionsOnThisPage()) {
+          $.bbq.pushState({page: this.lastValidPage()});
+          return;
+        }
         if (this.organizationId()) this.assignElectionsRelation();
       }
     },
@@ -116,8 +129,6 @@ _.constructor("Views.OrganizationOverview", View.Template, {
     },
 
     displayElections: function(elections) {
-      this.subscriptions.destroy();
-
       if (this.electionLisById) {
         _.each(this.electionLisById, function(li) {
           li.remove();
@@ -130,11 +141,26 @@ _.constructor("Views.OrganizationOverview", View.Template, {
       this.fetchCurrentPage().onSuccess(function() {
         this.stopLoading();
         this.electionsList.relation(elections).onComplete(function() {
-          this.nextPageLink.show();
+          if (this.shouldShowNextPageLink()) this.nextPageLink.show();
           $(window).scrollTop(1); $(window).scrollTop(0); // prevent mouse wheel from sticking in chrome on page transitions
         }, this);
         this.subscribeToVisits(elections);
       }, this);
+    },
+
+    shouldShowNextPageLink: function() {
+      return this.organization().electionCount() > (this.pageNumber() * this.itemsPerPage);
+    },
+
+    noElectionsOnThisPage: function() {
+      return this.organization().electionCount() <= (this.pageNumber() - 1) * this.itemsPerPage;
+    },
+
+    lastValidPage: function() {
+      var electionCount = this.organization().electionCount()
+      var page = Math.floor(electionCount / this.itemsPerPage);
+      if (electionCount % this.itemsPerPage > 0) page++;
+      return page;
     },
 
     pageFetchFutures: function() {
@@ -173,9 +199,10 @@ _.constructor("Views.OrganizationOverview", View.Template, {
     },
 
     subscribeToVisits: function(elections) {
-      this.subscriptions.add(elections.joinThrough(Application.currentUser().electionVisits()).onInsert(function(visit) {
+      if (this.visitsSubscription) this.visitsSubscription.destroy();
+      this.visitsSubscription = elections.joinThrough(Application.currentUser().electionVisits()).onInsert(function(visit) {
         this.electionsList.elementForRecord(visit.election()).visited();
-      }, this));
+      }, this);
     },
 
     editOrganization: function(elt, e) {
@@ -204,9 +231,9 @@ _.constructor("Views.OrganizationOverview", View.Template, {
     },
 
     goToNextPage: function(elt, event) {
+      event.preventDefault();
       var nextPage = this.pageNumber() + 1;
       $.bbq.pushState({page: nextPage});
-      event.preventDefault();
     },
 
     startLoading: function() {
