@@ -62,6 +62,7 @@ _.constructor("Views.OrganizationOverview", View.Template, {
     initialize: function() {
       this.subscriptions = new Monarch.SubscriptionBundle();
       this.pageFetchFuturesByOrgId = {};
+      this.highestFetchedPageByOrgId = {};
     },
 
     navigate: function(state) {
@@ -80,7 +81,11 @@ _.constructor("Views.OrganizationOverview", View.Template, {
 
     organizationId: {
       afterChange: function(organizationId) {
-        if (!this.pageFetchFuturesByOrgId[organizationId]) this.pageFetchFuturesByOrgId[organizationId] = {};
+        if (!this.pageFetchFuturesByOrgId[organizationId]) {
+          this.pageFetchFuturesByOrgId[organizationId] = {};
+          this.highestFetchedPageByOrgId[organizationId] = 0;
+        }
+
         var membership = this.organization().membershipForCurrentUser();
         if (membership) membership.update({lastVisited: new Date()});
         if (this.pageNumber()) this.assignElectionsRelation();
@@ -125,6 +130,7 @@ _.constructor("Views.OrganizationOverview", View.Template, {
       this.fetchCurrentPage().onSuccess(function() {
         this.stopLoading();
         this.electionsList.relation(elections).onComplete(function() {
+          this.nextPageLink.show();
           $(window).scrollTop(1); $(window).scrollTop(0); // prevent mouse wheel from sticking in chrome on page transitions
         }, this);
         this.subscribeToVisits(elections);
@@ -135,6 +141,16 @@ _.constructor("Views.OrganizationOverview", View.Template, {
       return this.pageFetchFuturesByOrgId[this.organizationId()];
     },
 
+    highestFetchedPage: {
+      reader: function() {
+        return this.highestFetchedPageByOrgId[this.organizationId()];
+      },
+
+      writer: function(page) {
+        return this.highestFetchedPageByOrgId[this.organizationId()] = page;
+      }
+    },
+
     fetchCurrentPage: function() {
       var currPage = this.pageNumber();
       var prevPage = currPage - 1;
@@ -142,9 +158,12 @@ _.constructor("Views.OrganizationOverview", View.Template, {
 
       var future = Server.get("/fetch_organization_page", {
         items_per_page: this.itemsPerPage,
+        highest_fetched_page: this.highestFetchedPage(),
         page: currPage,
         organization_id: this.organizationId()
       });
+
+      if (currPage > this.highestFetchedPage()) this.highestFetchedPage(currPage);
 
       _.each([prevPage, currPage, nextPage], function(page) {
         if (!this.pageFetchFutures()[page]) this.pageFetchFutures()[page] = future;
@@ -191,6 +210,7 @@ _.constructor("Views.OrganizationOverview", View.Template, {
     },
 
     startLoading: function() {
+      this.nextPageLink.hide();
       this.loading.show();
     },
 

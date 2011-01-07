@@ -7,7 +7,7 @@ _.constructor("Monarch.Future", {
 
   onComplete: function(callback, context) {
     if (this.completed) {
-      callback(this.value)
+      callback.call(context, this.value);
     } else {
       return this.onCompleteNode.subscribe(callback, context);
     }

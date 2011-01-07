@@ -181,13 +181,20 @@ module Hyperarchy
     end
 
     get "/fetch_organization_page" do
+      authentication_required
+      
       organization = Organization.find(params[:organization_id])
       raise Monarch::Unauthorized unless organization.current_user_is_member? || current_user.admin?
       items_per_page = params[:items_per_page].to_i
       page = params[:page].to_i
-      prev_page = page - 1
-      num_pages_to_fetch = page > 1 ? 3 : 2
-      offset = prev_page > 1 ? (prev_page - 1) * items_per_page : nil
+
+      highest_fetched_page = params[:highest_fetched_page].to_i
+
+      start_page = highest_fetched_page < page ? highest_fetched_page + 1 : page
+      end_page = page + 1
+      num_pages_to_fetch = end_page - start_page + 1
+
+      offset = start_page > 1 ? (start_page - 1) * items_per_page : nil
       limit = num_pages_to_fetch * items_per_page
 
       elections = organization.elections.order_by(Election[:score].desc).limit(limit)

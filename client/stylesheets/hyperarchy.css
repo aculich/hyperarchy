@@ -1379,8 +1379,8 @@ body.legal {
       padding-top: 1px; }
 #app #organizationOverview #moreQuestions {
   font-size: 19px;
-  float: right;
-  margin-bottom: 20px; }
+  margin-bottom: 20px;
+  display: none; }
 #app #organizationOverview .bigLoading {
   position: fixed;
   top: 50%;
