@@ -61,11 +61,6 @@ _.constructor("Views.OrganizationOverview", View.Template, {
     viewName: 'organization',
     itemsPerPage: 16,
 
-    initialize: function() {
-      this.pageFetchFuturesByOrgId = {};
-      this.highestFetchedPageByOrgId = {};
-    },
-
     navigate: function(state) {
       if (!state.organizationId) {
         $.bbq.pushState({view: 'organization', organizationId: Application.currentUser().lastVisitedOrganization().id()});
@@ -82,11 +77,6 @@ _.constructor("Views.OrganizationOverview", View.Template, {
 
     organizationId: {
       afterChange: function(organizationId) {
-        if (!this.pageFetchFuturesByOrgId[organizationId]) {
-          this.pageFetchFuturesByOrgId[organizationId] = {};
-          this.highestFetchedPageByOrgId[organizationId] = 0;
-        }
-
         var membership = this.organization().membershipForCurrentUser();
         if (membership) membership.update({lastVisited: new Date()});
         if (this.pageNumber()) this.assignElectionsRelation();
@@ -106,12 +96,14 @@ _.constructor("Views.OrganizationOverview", View.Template, {
     },
 
     pageNumber: {
-      afterChange: function() {
-        if (this.noElectionsOnThisPage()) {
+      afterChange: function(page) {
+        var lastValidPage = this.lastValidPage();
+        if (this.noElectionsOnThisPage() && lastValidPage > 1) {
           $.bbq.pushState({page: this.lastValidPage()});
           return;
         }
-        if (this.organizationId()) this.assignElectionsRelation();
+        this.organization().lastVisitedPage = page;
+        this.assignElectionsRelation();
       }
     },
 
@@ -129,20 +121,18 @@ _.constructor("Views.OrganizationOverview", View.Template, {
     },
 
     displayElections: function(elections) {
-      if (this.electionLisById) {
-        _.each(this.electionLisById, function(li) {
-          li.remove();
-        });
-      }
-      this.electionLisById = {};
-
       this.startLoading();
 
       this.fetchCurrentPage().onSuccess(function() {
         this.stopLoading();
         this.electionsList.relation(elections).onComplete(function() {
           if (this.shouldShowNextPageLink()) this.nextPageLink.show();
-          $(window).scrollTop(1); $(window).scrollTop(0); // prevent mouse wheel from sticking in chrome on page transitions
+
+          // prevent mouse wheel from sticking in chrome on page transitions
+          _.delay(function() {
+            $(window).resize();
+            $(window).scrollTop(10); $(window).scrollTop(0);
+          }, 10);
         }, this);
         this.subscribeToVisits(elections);
       }, this);
@@ -159,22 +149,8 @@ _.constructor("Views.OrganizationOverview", View.Template, {
     lastValidPage: function() {
       var electionCount = this.organization().electionCount()
       var page = Math.floor(electionCount / this.itemsPerPage);
-      if (electionCount % this.itemsPerPage > 0) page++;
+      if (electionCount === 0 || electionCount % this.itemsPerPage > 0) page++;
       return page;
-    },
-
-    pageFetchFutures: function() {
-      return this.pageFetchFuturesByOrgId[this.organizationId()];
-    },
-
-    highestFetchedPage: {
-      reader: function() {
-        return this.highestFetchedPageByOrgId[this.organizationId()];
-      },
-
-      writer: function(page) {
-        return this.highestFetchedPageByOrgId[this.organizationId()] = page;
-      }
     },
 
     fetchCurrentPage: function() {
@@ -182,20 +158,22 @@ _.constructor("Views.OrganizationOverview", View.Template, {
       var prevPage = currPage - 1;
       var nextPage = currPage + 1;
 
+      var organization = this.organization();
+
       var future = Server.get("/fetch_organization_page", {
         items_per_page: this.itemsPerPage,
-        highest_fetched_page: this.highestFetchedPage(),
+        highest_fetched_page: organization.highestFetchedPage,
         page: currPage,
         organization_id: this.organizationId()
       });
 
-      if (currPage > this.highestFetchedPage()) this.highestFetchedPage(currPage);
+      if (currPage > organization.highestFetchedPage) organization.highestFetchedPage = currPage;
 
       _.each([prevPage, currPage, nextPage], function(page) {
-        if (!this.pageFetchFutures()[page]) this.pageFetchFutures()[page] = future;
-      }, this)
+        if (!organization.pageFetchFutures[page]) organization.pageFetchFutures[page] = future;
+      }, this);
 
-      return this.pageFetchFutures()[currPage];
+      return organization.pageFetchFutures[currPage];
     },
 
     subscribeToVisits: function(elections) {

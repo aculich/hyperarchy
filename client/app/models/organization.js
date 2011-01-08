@@ -29,6 +29,12 @@ _.constructor("Organization", Model.Record, {
     }
   },
 
+  afterInitialize: function() {
+    this.pageFetchFutures = {};
+    this.highestFetchedPage = 0;
+    this.lastVisitedPage = 1;
+  },
+
   membershipForUser: function(user) {
     return this.memberships().find({userId: user.id()});
   },
@@ -48,5 +54,11 @@ _.constructor("Organization", Model.Record, {
 
   currentUserCanEdit: function() {
     return Application.currentUser().admin() || this.currentUserIsOwner();
+  },
+
+  navigateTo: function(goToLastVisitedPage) {
+    var params = {view: 'organization', organizationId: this.id() };
+    if (goToLastVisitedPage) params.page = this.lastVisitedPage;
+    $.bbq.pushState(params, 2);
   }
 });
